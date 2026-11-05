@@ -109,7 +109,7 @@ public class SimpleTradeValidatorTests
         Assert.IsFalse(result);
     }
     [TestMethod()]
-    public void TestAmount100k()
+    public void TestAmount1million()
     {
         //Arrange
         var logger = new ConsoleLogger();
@@ -123,7 +123,7 @@ public class SimpleTradeValidatorTests
         Assert.IsTrue(result);
     }
     [TestMethod()]
-    public void TestAmount101k()
+    public void TestAmountOver1million()
     {
         //Arrange
         var logger = new ConsoleLogger();
