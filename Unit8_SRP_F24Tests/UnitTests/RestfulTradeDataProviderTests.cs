@@ -1,4 +1,5 @@
-using System;
+using System.Net;
+using System.Text;
 using Unit8_SRP_F24;
 using Unit8_SRP_F24.Contracts;
 
@@ -7,32 +8,38 @@ namespace Unit8_SRP_F24Tests.UnitTests;
 [TestClass()]
 public class RestfulTradeDataProviderTests
 {
-    private int countStrings(IEnumerable<string> collectionOfStrings)
+    [TestMethod()]
+    public async Task TestSize3()
     {
-        // count the trades
-        int count = 0;
-        foreach (var trade in collectionOfStrings)
-        {
-            count++;
-        }
-        return count;
+        ILogger logger = new ConsoleLogger();
+        using var httpClient = new HttpClient(new StubHttpMessageHandler(
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("[\"GBPUSD,10000,2.25\",\"GBPJPY,50000,178.00\",\"USDEUR,2000,0.90\"]", Encoding.UTF8, "application/json")
+            }));
+        ITradeDataProvider tradeProvider = new RestfulTradeDataProvider(
+            "https://unit9trader.azurewebsites.net/api/TradeData", logger, httpClient);
+
+        IEnumerable<string> trades = await tradeProvider.ReadTradeDataAsync();
+
+        CollectionAssert.AreEqual(
+            new[] { "GBPUSD,10000,2.25", "GBPJPY,50000,178.00", "USDEUR,2000,0.90" },
+            trades.ToArray());
     }
 
-
-    [TestMethod()]
-    public void TestSize3()
+    private sealed class StubHttpMessageHandler : HttpMessageHandler
     {
-        //Arrange
-        ILogger logger = new ConsoleLogger();
-        string restfulURL = "http://unit9trader.azurewebsites.net/api/TradeData";
+        private readonly HttpResponseMessage response;
 
-        ITradeDataProvider tradeProvider = new RestfulTradeDataProvider(restfulURL, logger);
+        public StubHttpMessageHandler(HttpResponseMessage response)
+        {
+            this.response = response;
+        }
 
-        //Act
-        IEnumerable<string> trades = tradeProvider.ReadTradeData();
-
-        //Assert
-
-        Assert.AreEqual(countStrings(trades), 3);
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(response);
+        }
     }
 }

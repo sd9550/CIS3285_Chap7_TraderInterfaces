@@ -6,7 +6,7 @@ namespace Unit8_SRP_F24;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var tradeStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Unit8_SRP_F24.trades.txt");
         if (tradeStream is null)
@@ -15,19 +15,18 @@ class Program
             return;
         }
         ILogger logger = new ConsoleLogger();
-        ITradeValidator tradeValidator = new SimpleTradeValidator(logger);
-        //ITradeDataProvider tradeDataProvider = new StreamTradeDataProvider(tradeStream, logger);
-        // new URL reader for trade data
-        ITradeDataProvider URLDataProvider = new URLTradeDataProvider("http://raw.githubusercontent.com/tgibbons-css/CIS3285_Unit9_F24/refs/heads/master/SingleResponsibilityPrinciple/trades.txt", logger);
-    
 
+        ITradeDataProvider restfulDataProvider = new RestfulTradeDataProvider("https://unit9trader.azurewebsites.net/api/TradeData", logger);
+        ITradeDataProvider streamDataProvider = new StreamTradeDataProvider(tradeStream, logger);
+        ITradeDataProvider urlDataProvider = new URLTradeDataProvider("https://raw.githubusercontent.com/tgibbons-css/CIS3285_CurrencyTraderWeb/refs/heads/master/CurrencyTraderTests/trades_5good.txt", logger);    
+        
+        ITradeValidator tradeValidator = new SimpleTradeValidator(logger);
         ITradeMapper tradeMapper = new SimpleTradeMapper();
         ITradeParser tradeParser = new SimpleTradeParser(tradeValidator, tradeMapper);
         ITradeStorage tradeStorage = new AdoNetTradeStorage(logger);
 
-        var tradeProcessor = new TradeProcessor(URLDataProvider, tradeParser, tradeStorage);
-        tradeProcessor.ProcessTrades();
+        var tradeProcessor = new TradeProcessor(restfulDataProvider, tradeParser, tradeStorage);
+        await tradeProcessor.ProcessTradesAsync();
 
-        //Console.ReadKey();
     }
 }

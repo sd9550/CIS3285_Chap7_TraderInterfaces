@@ -20,11 +20,11 @@ public class TradeProcessor
     /// Main routine that processes the trade file
     /// </summary>
     /// <param name="stream"> The text file contianing the trade data </param>
-    public void ProcessTrades()
+    public async Task ProcessTradesAsync()
     {
-            var lines = tradeDataProvider.ReadTradeData();
-            var trades = tradeParser.ParseTrades(lines);
-            tradeStorage.StoreTrades(trades);
+        var lines = await tradeDataProvider.ReadTradeDataAsync();
+        var trades = tradeParser.ParseTrades(lines);
+        tradeStorage.StoreTrades(trades);
     }
 
 }

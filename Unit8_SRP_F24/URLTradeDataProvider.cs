@@ -4,6 +4,7 @@ namespace Unit8_SRP_F24;
 
 public class URLTradeDataProvider : ITradeDataProvider
 {
+    private static readonly HttpClient SharedHttpClient = new();
     private readonly string url;        // URL to fetch trade data from
     private readonly ILogger logger;    //  Logger to log messages
 
@@ -13,31 +14,25 @@ public class URLTradeDataProvider : ITradeDataProvider
         this.logger = logger;
     }
 
-    public IEnumerable<string> ReadTradeData()
+    public async Task<IEnumerable<string>> ReadTradeDataAsync()
     {
         logger.LogMessage("Reading trade data from URL: " + url);
-        // -------------- Add your code here to fetch trade data from the URL and return it as an IEnumerable<string> --------------
         List<string> tradeData = new List<string>();
-        using (HttpClient client = new HttpClient())
+        using (HttpResponseMessage response = await SharedHttpClient.GetAsync(url))
         {
-            HttpResponseMessage response = client.GetAsync(url).Result;
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogMessage("Failed to fetch trade data from URL: " + url);
                 throw new InvalidOperationException("Failed to fetch trade data from URL: " + url);
             }
-            // set up a Stream and StreamReader to access the data
-            using (Stream stream = response.Content.ReadAsStreamAsync().Result)
+            using (Stream stream = await response.Content.ReadAsStreamAsync())
             using (StreamReader reader = new StreamReader(stream))
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
-                        tradeData.Add(line);
+                    tradeData.Add(line);
                 }
-                // Read each line of the text file using reader.ReadLine()
-                // Read until the reader returns a null line
-                // Add each line to the tradeData list
             }
         }
         return tradeData;
