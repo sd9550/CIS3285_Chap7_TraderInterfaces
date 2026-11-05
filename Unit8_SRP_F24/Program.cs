@@ -16,12 +16,16 @@ class Program
         }
         ILogger logger = new ConsoleLogger();
         ITradeValidator tradeValidator = new SimpleTradeValidator(logger);
-        ITradeDataProvider tradeDataProvider = new StreamTradeDataProvider(tradeStream, logger);
+        //ITradeDataProvider tradeDataProvider = new StreamTradeDataProvider(tradeStream, logger);
+        // new URL reader for trade data
+        ITradeDataProvider URLDataProvider = new URLTradeDataProvider("http://raw.githubusercontent.com/tgibbons-css/CIS3285_Unit9_F24/refs/heads/master/SingleResponsibilityPrinciple/trades.txt", logger);
+    
+
         ITradeMapper tradeMapper = new SimpleTradeMapper();
         ITradeParser tradeParser = new SimpleTradeParser(tradeValidator, tradeMapper);
         ITradeStorage tradeStorage = new AdoNetTradeStorage(logger);
 
-        var tradeProcessor = new TradeProcessor(tradeDataProvider, tradeParser, tradeStorage);
+        var tradeProcessor = new TradeProcessor(URLDataProvider, tradeParser, tradeStorage);
         tradeProcessor.ProcessTrades();
 
         //Console.ReadKey();
