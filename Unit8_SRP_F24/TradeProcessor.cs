@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Unit8_SRP_F24.Contracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Unit8_SRP_F24;
 
@@ -25,6 +27,13 @@ public class TradeProcessor
             var lines = tradeDataProvider.ReadTradeData();
             var trades = tradeParser.ParseTrades(lines);
             tradeStorage.StoreTrades(trades);
+    }
+
+    public async Task ProcessTradesAsync(CancellationToken cancellationToken = default)
+    {
+        var lines = await tradeDataProvider.ReadTradeDataAsync(cancellationToken).ConfigureAwait(false);
+        var trades = tradeParser.ParseTrades(lines);
+        tradeStorage.StoreTrades(trades);
     }
 
 }

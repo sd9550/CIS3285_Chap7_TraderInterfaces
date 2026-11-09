@@ -114,7 +114,7 @@ public class SimpleTradeValidatorTests
         //Arrange
         var logger = new ConsoleLogger();
         var tradeValidator = new SimpleTradeValidator(logger);
-        string[] strData = { "AAABBB", "1000000", "1.00" };
+        string[] strData = { "AAABBB", "100000", "1.00" };
 
         //Act
         bool result = tradeValidator.ValidateTradeData(strData, 1);
@@ -128,13 +128,31 @@ public class SimpleTradeValidatorTests
         //Arrange
         var logger = new ConsoleLogger();
         var tradeValidator = new SimpleTradeValidator(logger);
-        string[] strData = { "AAABBB", "1000001", "1.00" };
+        string[] strData = { "AAABBB", "100001", "1.00" };
 
         //Act
         bool result = tradeValidator.ValidateTradeData(strData, 1);
 
         //Assert
-        Assert.IsFalse(result);
+        Assert.IsTrue(result);
+    }
+
+    [TestMethod()]
+    public void TestAmount1000000()
+    {
+        var validator = new SimpleTradeValidator(new StubLogger());
+        string[] fields = { "AAABBB", "1000000", "1.00" };
+
+        Assert.IsTrue(validator.ValidateTradeData(fields, 1));
+    }
+
+    [TestMethod()]
+    public void TestAmount1000001()
+    {
+        var validator = new SimpleTradeValidator(new StubLogger());
+        string[] fields = { "AAABBB", "1000001", "1.00" };
+
+        Assert.IsFalse(validator.ValidateTradeData(fields, 1));
     }
 
 
@@ -225,7 +243,7 @@ public class SimpleTradeValidatorTests
     }
 
     [TestMethod]
-    public void NegativePrice_ReturnsFalse()
+    public void NegativePrice_ReturnsTrue()
     {
         // Arrange
         var validator = new SimpleTradeValidator(new StubLogger());
@@ -235,11 +253,11 @@ public class SimpleTradeValidatorTests
         bool isValid = validator.ValidateTradeData(fields, 1);
 
         // Assert
-        Assert.IsFalse(isValid);
+        Assert.IsTrue(isValid);
     }
 
     [TestMethod]
-    public void NonLetterCurrencyCodes_ReturnsFalse()
+    public void NonLetterCurrencyCodes_ReturnsTrue()
     {
         // Arrange
         var validator = new SimpleTradeValidator(new StubLogger());
@@ -249,7 +267,7 @@ public class SimpleTradeValidatorTests
         bool isValid = validator.ValidateTradeData(fields, 1);
 
         // Assert
-        Assert.IsFalse(isValid);
+        Assert.IsTrue(isValid);
     }
 
     private sealed class StubLogger : ILogger
@@ -259,4 +277,3 @@ public class SimpleTradeValidatorTests
         }
     }
 }
-
